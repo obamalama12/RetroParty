@@ -46,7 +46,7 @@ window/vsync/vsync_mode=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/minigame_config_dialog/plugin.cfg")
+enabled=PackedStringArray("res://addons/zz_first_import/plugin.cfg", "res://addons/minigame_config_dialog/plugin.cfg")
 
 [gui]
 
