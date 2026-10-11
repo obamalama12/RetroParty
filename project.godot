@@ -31,6 +31,9 @@ Retro="*res://common/retro/retro.tscn"
 
 [debug]
 
+file_logging/enable_file_logging=true
+file_logging/max_log_files=5
+
 gdscript/warnings/shadowed_variable=false
 gdscript/warnings/return_value_discarded=false
 gdscript/warnings/integer_division=false

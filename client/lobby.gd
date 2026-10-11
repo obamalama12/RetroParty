@@ -377,7 +377,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 
 # ----- Save game code ----- #
 
-@rpc func load_savegame(filename: String, savegame: SaveGameLoader.SaveGame):
+@rpc("any_peer") func load_savegame(filename: String, savegame: SaveGameLoader.SaveGame):
 	is_new_savegame = false
 	current_savegame = savegame
 	savegame_name = filename
@@ -396,6 +396,6 @@ var sent_savegame_request := false
 		savegame_saved.emit()
 		sent_savegame_request = false
 
-@rpc func save_game() -> void:
+@rpc("any_peer") func save_game() -> void:
 	sent_savegame_request = true
 	save_game.rpc_id(1)

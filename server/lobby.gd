@@ -799,7 +799,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 
 @rpc func save_game_callback(_data: Dictionary, _err: String): pass
 
-@rpc func load_savegame(data: Dictionary) -> void:
+@rpc("any_peer") func load_savegame(data: Dictionary) -> void:
 	if not enable_savegames or not is_lobby_owner(multiplayer.get_remote_sender_id()):
 		return
 
@@ -809,7 +809,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 	playerstates = []
 	for i in len(savegame.players):
 		# TODO: what should we do here to add support for multiplayer savegames?
-		var addr := PlayerAddress.new(multiplayer.get_network_connected_peers()[0], i)
+		var addr := PlayerAddress.new(multiplayer.get_remote_sender_id(), i)
 		if savegame.players[i].is_ai:
 			addr = next_ai_addr()
 		var player_name: String = savegame.players[i].player_name
@@ -851,7 +851,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 	send_settings()
 	send_board()
 
-@rpc func save_game() -> void:
+@rpc("any_peer") func save_game() -> void:
 	if not enable_savegames:
 		save_game_callback.rpc_id(multiplayer.get_remote_sender_id(), {}, "SAVE_GAME_DISABLED")
 		return
