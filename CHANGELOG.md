@@ -6,11 +6,16 @@
 - New name, mascot (Joy), host (Mayor Pixel), Nintendo 64 look and Mario-Party style interface
 - New board RetroValley (the old KDEValley is gone), "?" spaces with board events, a zoom (mouse wheel, + and -, Z for an overview)
 - Five arcade minigames: Cookie Catch (stars, cookie storm), Hot Bomb, Jump Rope, Tug of War (best of three), Color Clash
+- The players vote between three minigames at the end of every round (bots vote too); a tie is decided by a spinning highlight
+- Three stationary party games on a stage: Pattern Pop, Quick Draw, Perfect Stop; a "How to play" card with everybody's buttons before every minigame
+- Short minigames are longer: Knock Off (two lives), Boat Rally (three lives), Kernel Compiling, Forest Run, Bowling; Escape from Lava is played in two heats (a game can set `"heats"` in its minigame.json)
+- Haunted Dreams (the ghost game) no longer ends when the first ghost reaches the bed: the bed has 6 health
 - Minigame test room in the main menu to try any minigame right away; minigames no longer repeat until all were played
 - Original chiptune music for the board, main menu and arcade minigames, new dice and turn sounds
 - New "your turn" banner and a dice roll animation with sparks
 
 ### Changed
+- A game is 6 rounds instead of 40; the shop and items are off by default (lobby setting "Shop and items"); often one vote option pays double cookies
 - Simpler lobby layout, UI scales with the window size, many clipping fixes, longer Kernel Compiling, weaker "?" events
 - Joy and Glitch (formerly GNU and Nolok) have their own tile art
 

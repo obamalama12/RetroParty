@@ -1,0 +1,23 @@
+# English texts of the minigame Pattern Pop.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+msgid "MINIGAME_NAME"
+msgstr "Pattern Pop"
+
+msgid "MINIGAME_DESCRIPTION"
+msgstr "WATCH the big screen: arrows light up one after the other.\n\nWhen it says YOUR TURN, press the same arrows in the same order with your direction buttons. A finished pattern scores points, the fastest players get a bonus, a wrong button ends your round. The pattern grows by one arrow every round, five rounds in all. Most points wins!"
+
+msgid "MINIGAME_ACTION_JUMP"
+msgstr "Jump"
+
+msgid "MINIGAME_ACTION_PULL"
+msgstr "Pull (press as fast as you can)"
+
+msgid "MINIGAME_ACTION_DIRECTIONS"
+msgstr "Repeat the pattern with the direction buttons"

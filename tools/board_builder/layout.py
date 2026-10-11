@@ -206,7 +206,7 @@ start["hidden"] = True
 start["name"] = "Start"
 link(start, nearest(loop, 0, LOOP_R))
 
-# types: 0 blue, 1 red, 2 green (warp), 3 yellow, 4 shop, 5 nolok, 6 gnu
+# types: 0 blue, 1 red, 2 green (warp), 3 yellow, 4 shop (unused, the shop is optional), 5 nolok, 6 gnu
 visible = [n for n in nodes if not n["hidden"]]
 for n in visible:
     r = rng.random()
@@ -229,7 +229,7 @@ def set_special(area, count_, kind, avoid_neighbours=True):
 
 
 for area in ("village", "farm", "beach", "castle", "graveyard"):
-    set_special(area, 1, 4)
+    set_special(area, 1, 7)
 
 # warps: pairs of green spaces. The player is carried from one to the other.
 WARPS = [("lake", "frozen"), ("forest", "castle"), ("mountain", "beach"), ("graveyard", "farm")]
@@ -564,6 +564,11 @@ for i in range(26):                                         # lanterns along the
     landmark("Lantern", (LOOP_R + 3.2) * math.cos(a), (LOOP_R + 3.2) * math.sin(a), radius=1)
 for x, z, rot in [(-15, 12, 20), (15, 12, -20), (12, -14, 160), (-12, -14, 200)]:
     landmark("Stall", x, z, rot=rot, radius=3)
+for ang in (18, 62, 118, 162, 198, 248, 292, 342):          # a bench facing the fountain with a flower bed behind it
+    a = math.radians(ang)
+    bx, bz = 15.0 * math.cos(a), 15.0 * math.sin(a)
+    landmark("Bench", bx, bz, rot=math.degrees(math.atan2(-bx, -bz)), radius=2)
+    landmark("Planter", 18.8 * math.cos(a), 18.8 * math.sin(a), rot=0, radius=2.2)
 for i in range(14):                                         # cottages in a wide ring
     a = math.radians(i * 360 / 14 + 8)
     hx, hz = 46 * math.cos(a), 46 * math.sin(a)

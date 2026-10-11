@@ -22,11 +22,12 @@ const PLAYER_TRANSLATION = [Vector3(0, 0, -0.75), Vector3(0.75, 0, 0),
 		Vector3(0, 0, 0.75), Vector3(-0.75, 0, 0)]
 const EMPTY_SPACE_PLAYER_TRANSLATION = Vector3(0, 0.05, 0)
 const CAMERA_SPEED = 6
+const FOG_DENSITY := 0.0045
 
 # Game options that can be customized in the Godot editor
 # Useful for board creation
 @export var COOKIES_FOR_CAKE := 30
-@export var MAX_TURNS := 10
+@export var MAX_TURNS := 6
 
 var lobby: Lobby
 
@@ -94,6 +95,11 @@ func _ready() -> void:
 	players.append_array(Utility.get_nodes_in_group(lobby, "players"))
 	for p in players:
 		p.controller = self
+
+	# The vote for the minigame of the round. Created in code, so it exists with the same path on server and clients
+	var minigame_vote := preload("res://common/scenes/board_logic/controller/minigamevote.gd").new()
+	minigame_vote.name = "MinigameVote"
+	$Screen.add_child(minigame_vote)
 
 	# set up player info box
 	var spacer := Control.new()
@@ -388,6 +394,7 @@ func relocate_cake() -> void:
 	$Screen/SpeechDialog.hide()
 	player_turn = next
 	show_splash()
+	players[next - 1].play_reaction("jump", 1.0)
 
 @rpc func splash_ended():
 	$Screen/TurnBanner.dismiss()
@@ -572,21 +579,35 @@ func prepare_minigame():
 	var state = Lobby.MinigameState.new()
 	state.minigame_teams = [blue_team, red_team]
 
+	var vote_type: String
 	match [blue_team.size(), red_team.size()]:
 		[4, 0]:
 			state.minigame_type = Lobby.MINIGAME_TYPES.FREE_FOR_ALL
-			state.minigame_config = lobby.minigame_queue.get_random_ffa()
+			vote_type = "FFA"
 		[3, 1]:
 			state.minigame_type = Lobby.MINIGAME_TYPES.ONE_VS_THREE
-			state.minigame_config = lobby.minigame_queue.get_random_1v3()
+			vote_type = "1v3"
 		[2, 2]:
 			state.minigame_type = Lobby.MINIGAME_TYPES.TWO_VS_TWO
-			state.minigame_config = lobby.minigame_queue.get_random_2v2()
+			vote_type = "2v2"
+	state.minigame_config = await _vote_for_minigame(vote_type)
 
 	lobby.turn += 1
 	player_turn = 1
 	lobby.minigame_state = state
 	lobby.broadcast(show_minigame.bind(state.encode()))
+
+## The players vote between up to three minigames of the given type, the winner is played
+func _vote_for_minigame(type: String) -> MinigameLoader.MinigameConfigFile:
+	var options: Array = lobby.minigame_queue.get_vote_options(type)
+	var chosen: MinigameLoader.MinigameConfigFile = options[0]
+	if options.size() > 1:
+		chosen = await $Screen/MinigameVote.run(options)
+		lobby.minigame_stakes = 2 if $Screen/MinigameVote.winner_has_stakes else 1
+	else:
+		lobby.minigame_stakes = 1
+	lobby.minigame_queue.choose(chosen)
+	return chosen
 
 @rpc func show_minigame(encoded_state: Array):
 	var state = Lobby.MinigameState.decode(encoded_state)
@@ -681,7 +702,7 @@ func _step(player: PlayerBoard, previous_space: NodeBoard, last: bool) -> Array:
 			await get_tree().create_timer(1).timeout
 
 	# If player passes a shop space
-	if player.space.type == NodeBoard.NODE_TYPES.SHOP:
+	if player.space.type == NodeBoard.NODE_TYPES.SHOP and lobby.overrides.items:
 		if not stopped:
 			if player.space != previous_space:
 				update_space(previous_space)
@@ -706,7 +727,7 @@ func _step(player: PlayerBoard, previous_space: NodeBoard, last: bool) -> Array:
 	var space := player.space
 	var last_step := last and space.is_visible_space()
 	var next_step_blocking = not last and (space.next.size() > 1 or
-			space.cake or space.type == NodeBoard.NODE_TYPES.SHOP)
+			space.cake or (space.type == NodeBoard.NODE_TYPES.SHOP and lobby.overrides.items))
 	if not last_step and not next_step_blocking:
 		player._internal_walk_to(player.space, player.space.position)
 	
@@ -844,6 +865,9 @@ func land_on_space(player: PlayerBoard):
 			await $Screen/SpeechDialog.dialog_finished
 			
 			var actions := Lobby.GNU_ACTION_TYPES.values()
+			if not lobby.overrides.items:
+				# The solo game pays out an item
+				actions.erase(Lobby.GNU_ACTION_TYPES.SOLO_MINIGAME)
 			var type: Lobby.GNU_ACTION_TYPES = actions[randi() % actions.size()]
 			
 			var state := Lobby.MinigameState.new()
@@ -1067,6 +1091,8 @@ func animation_step(space: NodeBoard, player_id: int) -> void:
 		$Screen/Stepcounter.text = ""
 
 func play_space_step_sfx(space: NodeBoard, player_id: int) -> void:
+	if space.is_visible_space():
+		space.pulse()
 	if player_id == player_turn and space.is_visible_space():
 		$StepFX.play()
 
@@ -1075,6 +1101,8 @@ func _process(delta: float) -> void:
 		camera_base_position = $Camera3D.position
 	zoom_current = lerpf(zoom_current, zoom_target, minf(1.0, 6.0 * delta))
 	$Camera3D.position = camera_base_position + $Camera3D.transform.basis.z * zoom_current
+	# Zoomed out, the fog would wash the whole board out
+	$Camera3D.environment.fog_density = FOG_DENSITY / (1.0 + maxf(zoom_current, 0.0) * 0.15)
 	if camera_focus != null:
 		var dir: Vector3 = camera_focus.position - position
 		if dir.length() > 0.01:

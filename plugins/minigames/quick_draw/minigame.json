@@ -1,0 +1,21 @@
+{
+	"name": "MINIGAME_NAME",
+	"scene_path": "res://plugins/minigames/quick_draw/minigame.tscn",
+	"image_path": "res://plugins/minigames/quick_draw/screenshot.png",
+	"translation_directory": "res://plugins/minigames/quick_draw/translations",
+	"type": [
+		"FFA",
+		"Duel",
+		"2v2",
+		"1v3"
+	],
+	"description": "MINIGAME_DESCRIPTION",
+	"controls": [
+		{
+			"actions": [
+				"action1"
+			],
+			"text": "MINIGAME_ACTION_PRESS"
+		}
+	]
+}

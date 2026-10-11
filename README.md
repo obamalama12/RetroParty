@@ -38,6 +38,23 @@ survive the cookie storm), **Hot Bomb** (pass the lit bomb on), **Jump Rope** (j
 (mash the button, best of three) and **Color Clash** (run to the called colour before the other tiles drop). Their logic is in
 `plugins/minigames/<name>/minigame.gd` on top of `common/scripts/arcade`; `tools/arcade_test` plays them to the end with bots.
 
+## Minigame vote
+
+At the end of each round the players vote between three minigames of the right type (two for 1v3, which only has two games). Left/right moves the
+cursor, OK votes, bots vote on their own and anyone who does not vote within 15 s abstains. A tie is decided by a spinning highlight.
+The logic is in `common/scenes/board_logic/controller/minigamevote.gd`, the options come from `server/minigame_queue.gd`;
+`tools/board_check/vote_test` takes screenshots of it.
+
+### Stationary party games
+
+**Pattern Pop** (repeat the pattern of arrows), **Quick Draw** (press when the light turns green, not before) and **Perfect Stop**
+(stop the marker in the green zone) are played on a stage where everybody stands on a podium and only uses their buttons, like many
+Mario Party games. They share `common/scripts/arcade/podium_game.gd`; the scene, config and texts of a new one come from
+`tools/arcade_builder/gen_minigames.py <name>`. Every minigame starts with a "How to play" card (the goal and everybody's buttons)
+before the 3-2-1, and the game info screen before it has the full description. `UNTIL_END=1` of `tools/minigame_playthrough`
+plays a game to its end and reports how long it took; `tools/minigame_playthrough/heats_test` plays a game with several heats for real.
+A short game can list `"heats": 2` in its `minigame.json`: it is played twice in a row and the results are added up (`_combine_heats` in `server/lobby.gd`).
+
 ## Music
 
 The board, the main menu and the arcade minigames have original chiptune tracks (pulse, triangle and noise channels) that

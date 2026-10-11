@@ -6,7 +6,7 @@ var knocked_out := 0
 var lobby: Lobby
 
 var box_counter := 0
-const GAME_TIME := 30.0
+const GAME_TIME := 40.0
 const BARRAGE_TIME := 7.0
 var minigame_time := GAME_TIME
 var banner: Label

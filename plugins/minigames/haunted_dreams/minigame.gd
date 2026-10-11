@@ -3,6 +3,9 @@ extends Node3D
 @onready var lobby := Lobby.get_lobby(self)
 
 const GAME_DURATION := 45.0
+## The bed can take this many hits. A ghost that reaches it is gone, but costs a point of bed health (a boss costs two),
+## so one slip does not end the game after a few seconds.
+const BED_HEALTH := 6
 const POWERUP_FLASH := 0
 const POWERUP_FREEZE := 1
 
@@ -14,6 +17,36 @@ var powerup_timer := 6.0
 var next_powerup_id := 0
 var powerups := {}
 var kills := 0
+var bed_health := BED_HEALTH
+var bed_label: Label
+
+func _ready() -> void:
+	bed_label = Label.new()
+	bed_label.theme_type_variation = &"HeaderMedium"
+	bed_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	bed_label.position = Vector2(24, 20)
+	bed_label.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.85))
+	$Control.add_child(bed_label)
+	_client_bed(bed_health)
+
+## Server: a ghost reached the bed
+func ghost_reached_bed(ghost: Node) -> void:
+	if finished or ghost.dead:
+		return
+	ghost.dead = true
+	lobby.broadcast(ghost.delete)
+	ghost.delete()
+	bed_health = maxi(bed_health - (2 if ghost.kind == ghost.Kind.BOSS else 1), 0)
+	lobby.broadcast(_client_bed.bind(bed_health))
+	_client_bed(bed_health)
+	lobby.broadcast(screen_flash.bind(Color(1, 0.2, 0.2, 0.5)))
+	screen_flash(Color(1, 0.2, 0.2, 0.5))
+	if bed_health <= 0:
+		end_game()
+
+@rpc func _client_bed(health: int) -> void:
+	if bed_label:
+		bed_label.text = "BED HEALTH  %d / %d" % [health, BED_HEALTH]
 
 func end_game():
 	setup_game_end()

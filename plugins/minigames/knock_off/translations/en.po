@@ -21,7 +21,7 @@ msgstr "Knock Off"
 
 msgid "MINIGAME_DESCRIPTION"
 msgstr ""
-"Each player attempts to knock all opponents off the iceberg.\n"
+"Knock your opponents off the iceberg! Everybody has two lives: the first time you fall you come back on the ice.\n"
 "The ice cracks and shrinks as time passes, so stay near the middle! "
 "Roll through glowing orbs for a speed boost (yellow) or to become heavy and "
 "hard to push (red). If it takes too long, the ice melts away completely.\n"

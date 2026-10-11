@@ -12,4 +12,12 @@ func _ready() -> void:
 			if seq[i] == seq[i - 1]:
 				rep += 1
 		print("QUEUE ", kind, " repeats ", rep, " ", seq.slice(0, 12))
+	for kind in ["FFA", "1v3", "2v2"]:
+		var shown := []
+		for i in 30:
+			var options = q.get_vote_options(kind)
+			assert(options.size() == mini(3, options.size()) and options.size() > 0)
+			shown.append(options.size())
+			q.choose(options.pick_random())
+		print("QUEUE vote ", kind, " option counts ", shown.slice(0, 8))
 	get_tree().quit()

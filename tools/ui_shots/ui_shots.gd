@@ -123,7 +123,10 @@ func _ready() -> void:
 		if get_node("/root/Server").is_ancestor_of(n):
 			ctrl = n
 	ctrl.prepare_minigame()
-	await wait(2.5)
+	await wait(2.0)
+	await snap("minigame_vote")
+	await press("player1_ok")
+	await wait(9.0)
 	await snap("minigame_intro")
 	await wait(4.0)
 	await snap("minigame_info")

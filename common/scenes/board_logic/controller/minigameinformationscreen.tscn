@@ -100,15 +100,16 @@ anchor_bottom = 1.0
 offset_left = 10.0
 offset_top = 100.0
 offset_right = -10.0
-theme_override_constants/separation = 50
+theme_override_constants/separation = 14
 
 [node name="Description" type="HBoxContainer" parent="Content/Rows"]
 layout_mode = 2
 size_flags_vertical = 3
+size_flags_stretch_ratio = 1.7
 theme_override_constants/separation = 25
 
 [node name="Screenshot" type="TextureRect" parent="Content/Rows/Description"]
-custom_minimum_size = Vector2(572, 250)
+custom_minimum_size = Vector2(444, 250)
 layout_mode = 2
 size_flags_horizontal = 7
 size_flags_vertical = 3
@@ -120,6 +121,7 @@ custom_minimum_size = Vector2(380, 100)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 23
 bbcode_enabled = true
 
 [node name="Panel" type="Panel" parent="Content/Rows/Description"]
@@ -156,7 +158,7 @@ columns = 4
 [node name="Spacer" type="Control" parent="Content/Rows"]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 2.0
+size_flags_stretch_ratio = 0.1
 
 [node name="Title" type="Label" parent="."]
 custom_minimum_size = Vector2(500, 50)

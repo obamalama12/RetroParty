@@ -386,6 +386,16 @@ func finish_by_points(points: Array) -> void:
 		return
 	finished = true
 	match lobby.minigame_state.minigame_type:
+		Lobby.MINIGAME_TYPES.ONE_VS_THREE:
+			# the solo player (the last player node) scores three times, so the sides are even
+			var team_total: float = points[0] + points[1] + points[2]
+			var solo_total: float = points[3] * 3.0
+			if team_total > solo_total:
+				lobby.minigame_1v3_win_team_players()
+			elif team_total < solo_total:
+				lobby.minigame_1v3_win_solo_player()
+			else:
+				lobby.minigame_1v3_draw()
 		Lobby.MINIGAME_TYPES.TWO_VS_TWO:
 			lobby.minigame_team_win_by_points([points[0] + points[1], points[2] + points[3]])
 		_:

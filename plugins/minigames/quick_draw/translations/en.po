@@ -1,0 +1,23 @@
+# English texts of the minigame Quick Draw.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+msgid "MINIGAME_NAME"
+msgstr "Quick Draw"
+
+msgid "MINIGAME_DESCRIPTION"
+msgstr "Watch the signal light. While it is RED or yellow, do NOT press!\n\nWhen it turns GREEN, press the button as fast as you can. The fastest player of a round scores the most points. Pressing too early is a false start and you sit the round out. Watch out for fake yellow flashes! Six rounds, the last one counts double. Most points wins!"
+
+msgid "MINIGAME_ACTION_JUMP"
+msgstr "Jump"
+
+msgid "MINIGAME_ACTION_PULL"
+msgstr "Pull (press as fast as you can)"
+
+msgid "MINIGAME_ACTION_PRESS"
+msgstr "Press as soon as the light turns GREEN"

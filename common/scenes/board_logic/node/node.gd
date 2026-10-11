@@ -280,3 +280,14 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if prev.is_empty():
 		warnings.append("No incoming nodes configured")
 	return warnings
+
+
+## A short bounce, played when a player steps on the space
+func pulse() -> void:
+	if not has_node("Model"):
+		return
+	var model: Node3D = $Model
+	var base := model.scale
+	var tween := create_tween()
+	tween.tween_property(model, "scale", base * Vector3(1.25, 0.6, 1.25), 0.08)
+	tween.tween_property(model, "scale", base, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

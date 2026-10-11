@@ -22,6 +22,15 @@ var next_pickup_id := 0
 var pickup_countdown := 3.0
 var wave := 0
 var finished := false
+## The boat survives this many bombs (the last one sinks it), and cannot be hit again for a moment after a hit.
+const MAX_LIVES := 3
+const HIT_PROTECTION := 2.0
+var lives := MAX_LIVES
+var protection := 0.0
+
+@rpc func hit_popup(lives_left: int) -> void:
+	show_popup(tr("BOAT_RALLY_OUCH").format({"lives": lives_left}), Color(1, 0.35, 0.3))
+	play_sound("res://assets/sounds/wrong.wav", 0.7)
 
 func _integrate_forces(state):
 	if is_hit:
@@ -232,6 +241,7 @@ func spawn_pickups():
 
 func _server_process(delta):
 	countdown -= delta
+	protection = maxf(0.0, protection - delta)
 	boost_time = maxf(0.0, boost_time - delta)
 	if not finished and not is_hit:
 		pickup_countdown -= delta

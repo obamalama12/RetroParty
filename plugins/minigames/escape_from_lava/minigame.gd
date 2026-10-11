@@ -1,6 +1,6 @@
 extends Node3D
 
-const LAVA_RISE_SPEED = 0.25
+const LAVA_RISE_SPEED = 0.18
 const SURGE_HEIGHT := 0.45
 const SURGE_SPEED := 1.1
 const SURGE_WARNING_TIME := 1.8

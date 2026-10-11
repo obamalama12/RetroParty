@@ -339,6 +339,9 @@ msgstr "Public Lobby"
 msgid "MENU_SETTINGS_CAKE_COST"
 msgstr "Cake cost"
 
+msgid "MENU_SETTINGS_ITEMS"
+msgstr "Shop and items"
+
 msgid "MENU_SETTINGS_TURNS"
 msgstr "Turns"
 
@@ -1022,3 +1025,30 @@ msgstr "Marathon Runner"
 
 msgid "AWARD_RUNNER_TEXT"
 msgstr "Walked the most steps ({value}). Mind the blisters."
+
+msgid "CONTEXT_VOTE_TITLE"
+msgstr "Vote for the next minigame!"
+
+msgid "CONTEXT_VOTE_HINT"
+msgstr "Left / right to choose, OK to vote"
+
+msgid "CONTEXT_VOTE_WAIT"
+msgstr "The other players are voting..."
+
+msgid "CONTEXT_VOTE_TIE"
+msgstr "A tie! Fate decides..."
+
+msgid "CONTEXT_VOTE_WINNER"
+msgstr "Next up!"
+
+msgid "CONTEXT_VOTE_COUNT"
+msgstr "Votes: {count}"
+
+msgid "CONTEXT_VOTE_STAKES"
+msgstr "x2 COOKIES!"
+
+msgid "CONTEXT_HOW_TO_PLAY"
+msgstr "HOW TO PLAY"
+
+msgid "CONTEXT_HEAT"
+msgstr "HEAT {heat} of {total}"

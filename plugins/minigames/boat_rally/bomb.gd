@@ -42,6 +42,17 @@ func _on_Bomb_body_entered(body):
 			get_parent().get_parent().lobby.broadcast(pop)
 			pop()
 			return
+		if body.protection > 0.0 or body.lives > 1:
+			# a bomb that hits a protected or healthy boat only costs a life
+			popped = true
+			if body.protection <= 0.0:
+				body.lives -= 1
+				body.protection = body.HIT_PROTECTION
+				body.lobby.broadcast(body.hit_popup.bind(body.lives))
+				body.hit_popup(body.lives)
+			get_parent().get_parent().lobby.broadcast(pop)
+			pop()
+			return
 		body.is_hit = true
 		var lobby: Lobby = get_parent().get_parent().lobby
 		lobby.broadcast(explode)

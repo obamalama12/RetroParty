@@ -48,6 +48,7 @@ func set_winner(win):
 func _ready():
 	$Model.set_as_top_level(true)
 	set_multiplayer_authority(info.addr.peer_id)
+	_show_lives(2)
 	minigame_mode = info.lobby.minigame_state.minigame_type
 	
 	if info.is_ai():
@@ -60,6 +61,37 @@ func _ready():
 				max_speed *= 0.9
 			Lobby.Difficulty.HARD:
 				accel = 11
+
+var lives_label: Label3D
+
+## The server puts a player that fell off back on the ice. Players are moved by the machine of their owner, so the
+## server tells that machine (and everybody else) where to put the ball.
+@rpc("any_peer") func respawn(spot: Vector3, lives_left: int) -> void:
+	var sender := multiplayer.get_remote_sender_id()
+	if sender != 0 and sender != 1:
+		return
+	var xform := Transform3D(Basis(), spot)
+	PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, xform)
+	PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, Vector3.ZERO)
+	PhysicsServer3D.body_set_state(get_rid(), PhysicsServer3D.BODY_STATE_ANGULAR_VELOCITY, Vector3.ZERO)
+	position = spot
+	_show_lives(lives_left)
+	if has_node("Model"):
+		$Model.play_animation("jump")
+
+func _show_lives(count: int) -> void:
+	if lives_label == null:
+		lives_label = Label3D.new()
+		lives_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		lives_label.no_depth_test = true
+		lives_label.pixel_size = 0.006
+		lives_label.font_size = 64
+		lives_label.outline_size = 14
+		lives_label.outline_modulate = Color(0.1, 0.05, 0.3)
+		lives_label.position = Vector3(0, 1.7, 0)
+		$Model.add_child(lives_label)
+	lives_label.text = "%d" % count if count > 1 else "LAST LIFE"
+	lives_label.modulate = Color(0.6, 1.0, 0.6) if count > 1 else Color(1.0, 0.45, 0.4)
 
 @rpc("unreliable") func position_update(x: Vector3, v: Vector3, rot: float):
 	self.position = x

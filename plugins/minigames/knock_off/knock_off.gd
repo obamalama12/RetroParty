@@ -4,6 +4,11 @@ var lobby: Lobby
 
 @onready var players = Utility.get_nodes_in_group(self, "players")
 
+## Everybody has this many lives: the first time you fall off you come back on the ice, the second time you are out.
+## That keeps a round going for a decent time instead of ending with the first push.
+const LIVES := 2
+var lives := {} # player id -> lives left (server)
+
 var losses = 0 # Number of players that have been knocked-out
 var placement# Placements, is filled with player id in order. Index 0 is first place
 var timer_end = 4 # How long the winning message will be shown before exiting
@@ -173,6 +178,14 @@ func _server_process(delta):
 		_server_ice_and_orbs(delta)
 	for p in players:
 		if p.position.y < -10:
+			var pid: int = p.info.player_id
+			lives[pid] = lives.get(pid, LIVES) - 1
+			if lives[pid] > 0 and not timer_end_start:
+				# back on the ice, somewhere near the middle
+				var spot := Vector3(randf_range(-1.2, 1.2), 4.2, randf_range(-1.2, 1.2))
+				lobby.broadcast(p.respawn.bind(spot, lives[pid]))
+				p.respawn(spot, lives[pid])
+				continue
 			losses += 1
 			placement[placement.size() - losses] = p.info.player_id # Assign placement before deleting player
 			if losses == placement.size():

@@ -60,23 +60,27 @@ func _ready() -> void:
 		var ctrl := server_controller()
 		print("RT round ", r, " starting minigame")
 		ctrl.prepare_minigame()
-		if not await wait_for(func(): return slobby.minigame_state != null, 20, "minigame state"):
+		if not await wait_for(func(): return slobby.minigame_state != null, 60, "minigame state"):
 			break
 		await wait(2.0)
 		clobby.goto_minigame(false)
 		await wait_for(func(): return get_tree().get_nodes_in_group("players").size() > 0 and server_controller() == null, 60, "minigame scene")
-		await wait(3.0)
-		print("RT in minigame ", slobby.minigame_state.minigame_config.name if slobby.minigame_state else "?")
-		# end it with player 1 winning
-		match slobby.minigame_state.minigame_type:
-			Lobby.MINIGAME_TYPES.FREE_FOR_ALL:
-				slobby.minigame_win_by_position([1, 2, 3, 4])
-			Lobby.MINIGAME_TYPES.TWO_VS_TWO:
-				slobby.minigame_team_win(0)
-			Lobby.MINIGAME_TYPES.ONE_VS_THREE:
-				slobby.minigame_1v3_win_solo_player()
-			_:
-				slobby.minigame_nolok_win()
+		await wait(9.0)   # the how-to-play card and the countdown run first
+		print("RT in minigame ", slobby.minigame_state.minigame_config.filename if slobby.minigame_state else "?")
+		# end it with player 1 winning (a game with several heats needs this once per heat)
+		var heats: int = slobby.minigame_state.minigame_config.heats
+		for heat in heats:
+			match slobby.minigame_state.minigame_type:
+				Lobby.MINIGAME_TYPES.FREE_FOR_ALL:
+					slobby.minigame_win_by_position([1, 2, 3, 4])
+				Lobby.MINIGAME_TYPES.TWO_VS_TWO:
+					slobby.minigame_team_win(0)
+				Lobby.MINIGAME_TYPES.ONE_VS_THREE:
+					slobby.minigame_1v3_win_solo_player()
+				_:
+					slobby.minigame_nolok_win()
+			if heat < heats - 1:
+				await wait(14.0)   # the next heat loads, counts down and starts
 		print("RT minigame ended, waiting for reward screen / board")
 		for i in 60:
 			await wait(1.0)

@@ -97,7 +97,7 @@ func _on_area_3d_area_entered(area: Area3D):
 	if not multiplayer.is_server():
 		return
 	if area.is_in_group(&"target"):
-		get_parent().end_game()
+		get_parent().ghost_reached_bed(self)
 
 func _on_area_3d_body_entered(body: Node3D):
 	if not multiplayer.is_server():

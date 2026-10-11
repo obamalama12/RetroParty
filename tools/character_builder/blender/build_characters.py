@@ -24,6 +24,14 @@ from PIL import Image
 OUT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else sys.argv[1]
 FPS = 24
 
+# Polygon budget. The default is the Nintendo 64 look: chunky 10 x 6 spheres, 8 sided cylinders, one bevel step,
+# so a character has about 1500 triangles (Mario 64's Mario has less than 1000). POLY=high builds the smooth version
+# that was used before (7000 - 15000 triangles).
+HIGH_POLY = os.environ.get("POLY", "low") == "high"
+SPHERE_SEGMENTS = (20, 12) if HIGH_POLY else (10, 6)
+CYLINDER_SEGMENTS = 14 if HIGH_POLY else 8
+BEVEL_STEPS = 3 if HIGH_POLY else 1
+
 # ---------------------------------------------------------------- palette
 
 PALETTE_COLORS = {}
@@ -93,7 +101,7 @@ class Builder:
     def blob(self, color, bone, pos, size, rot=(0, 0, 0), smooth=True):
         """An ellipsoid. pos=(x, up, front); size = radii (x, up, front)."""
         bm = bmesh.new()
-        bmesh.ops.create_uvsphere(bm, u_segments=20, v_segments=12, radius=1.0)
+        bmesh.ops.create_uvsphere(bm, u_segments=SPHERE_SEGMENTS[0], v_segments=SPHERE_SEGMENTS[1], radius=1.0)
         self._finish(bm, color, bone, pos, size, rot, smooth)
 
     def block(self, color, bone, pos, size, rot=(0, 0, 0), bevel=0.0, smooth=False):
@@ -105,7 +113,7 @@ class Builder:
     def cone(self, color, bone, pos, radius, depth, rot=(0, 0, 0), top=0.0, smooth=True):
         """A cone/cylinder along the up axis; rot is (pitch, yaw, roll) degrees."""
         bm = bmesh.new()
-        bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=14,
+        bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=CYLINDER_SEGMENTS,
                               radius1=radius, radius2=top, depth=depth)
         self._finish(bm, color, bone, pos, (1, 1, 1), rot, smooth, detail=depth <= 0.05)
 
@@ -123,7 +131,7 @@ class Builder:
         bmesh.ops.transform(bm, matrix=scale, verts=bm.verts)
         if bevel > 0:
             bmesh.ops.bevel(bm, geom=list(bm.verts) + list(bm.edges) + list(bm.faces),
-                            offset=bevel * self.k, segments=3, affect="EDGES", profile=0.6)
+                            offset=bevel * self.k, segments=BEVEL_STEPS, affect="EDGES", profile=0.6)
         bmesh.ops.transform(bm, matrix=rotation, verts=bm.verts)
         bmesh.ops.transform(bm, matrix=mathutils.Matrix.Translation(self.v(*pos)), verts=bm.verts)
         self._add(bm, color, bone, smooth, detail)

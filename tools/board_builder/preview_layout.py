@@ -26,7 +26,7 @@ by_name = {nd["name"]: nd for nd in layout["nodes"]}
 for nd in layout["nodes"]:
     for nx in nd["next"]:
         d.line([px(nd["pos"][0], nd["pos"][2]), px(*[by_name[nx]["pos"][i] for i in (0, 2)])], fill=(60, 40, 20), width=2)
-cols = {0: (60, 140, 255), 1: (255, 60, 60), 2: (60, 220, 90), 3: (255, 220, 40), 4: (255, 255, 255), 5: (120, 0, 120), 6: (255, 140, 0)}
+cols = {0: (60, 140, 255), 1: (255, 60, 60), 2: (60, 220, 90), 3: (255, 220, 40), 4: (255, 255, 255), 5: (120, 0, 120), 6: (255, 140, 0), 7: (230, 60, 230)}
 for nd in layout["nodes"]:
     x, y = px(nd["pos"][0], nd["pos"][2])
     r = 4 if not nd["cake"] else 7

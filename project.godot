@@ -31,6 +31,9 @@ Retro="*res://common/retro/retro.tscn"
 
 [debug]
 
+file_logging/enable_file_logging=true
+file_logging/max_log_files=5
+
 gdscript/warnings/shadowed_variable=false
 gdscript/warnings/return_value_discarded=false
 gdscript/warnings/integer_division=false
@@ -46,7 +49,7 @@ window/vsync/vsync_mode=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/minigame_config_dialog/plugin.cfg")
+enabled=PackedStringArray("res://addons/zz_first_import/plugin.cfg", "res://addons/minigame_config_dialog/plugin.cfg")
 
 [gui]
 

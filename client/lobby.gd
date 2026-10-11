@@ -286,6 +286,10 @@ func goto_minigame(is_try: bool):
 	_goto_scene("res://client/menus/victory_screen/victory_screen.tscn", false)
 	started = false
 
+@rpc func heat_started(heat: int):
+	if minigame_state:
+		minigame_state.heat = heat
+
 @rpc func load_minigame():
 	_goto_scene_minigame(minigame_state.minigame_config.scene_path, minigame_state)
 
@@ -373,7 +377,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 
 # ----- Save game code ----- #
 
-@rpc func load_savegame(filename: String, savegame: SaveGameLoader.SaveGame):
+@rpc("any_peer") func load_savegame(filename: String, savegame: SaveGameLoader.SaveGame):
 	is_new_savegame = false
 	current_savegame = savegame
 	savegame_name = filename
@@ -392,6 +396,6 @@ var sent_savegame_request := false
 		savegame_saved.emit()
 		sent_savegame_request = false
 
-@rpc func save_game() -> void:
+@rpc("any_peer") func save_game() -> void:
 	sent_savegame_request = true
 	save_game.rpc_id(1)

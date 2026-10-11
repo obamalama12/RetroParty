@@ -5,9 +5,11 @@ signal setting_changed(setting)
 
 class BoardOverrides:
 	var cake_cost := 30
-	var max_turns := 10
+	var max_turns := 6
 	# Option to choose how players are awarded after completing a mini-game.
 	var award: int = Lobby.AWARD_TYPE.LINEAR
+	# Shop spaces and the items they sell. Off by default, the game is quicker without them.
+	var items := false
 
 const MINIGAME_REWARD_SCREEN = preload("res://server//rewardscreens/rewardscreen.tscn")
 
@@ -15,6 +17,9 @@ const MinigameQueue = preload("res://server/minigame_queue.gd")
 
 var overrides: BoardOverrides = BoardOverrides.new()
 var minigame_queue: MinigameQueue = MinigameQueue.new()
+
+# Cookie multiplier of the minigame that is about to be played (2 if the players voted for the high stakes game)
+var minigame_stakes := 1
 
 var started := false
 var loaded_from_savegame := false
@@ -44,7 +49,8 @@ func _init():
 	settings["main/enable_timeout"] = Settings.new_bool("MENU_SETTINGS_ENABLE_TIMEOUT", not Global.is_local_multiplayer())
 	settings["main/timeout"] = Settings.new_range("MENU_SETTINGS_TIMEOUT", 30, 10, 65535)
 	settings["main/cake_cost"] = Settings.new_range("MENU_SETTINGS_CAKE_COST", 30, 10, 65535)
-	settings["main/turns"] = Settings.new_range("MENU_SETTINGS_TURNS", 10, 1, 65535)
+	settings["main/turns"] = Settings.new_range("MENU_SETTINGS_TURNS", 6, 1, 65535)
+	settings["main/items"] = Settings.new_bool("MENU_SETTINGS_ITEMS", false)
 	settings["main/award_type"] = Settings.new_options("MENU_SETTINGS_AWARD_TYPE", "MENU_SETTINGS_AWARD_LINEAR", ["MENU_SETTINGS_AWARD_LINEAR", "MENU_SETTINGS_AWARD_WINNER_TAKES_ALL"])
 	setting_changed.connect(_on_setting_changed)
 	current_board = PluginSystem.board_loader.get_loaded_boards()[0]
@@ -65,6 +71,8 @@ func _on_setting_changed(setting: Settings):
 			overrides.cake_cost = setting.get_value()
 		"MENU_SETTINGS_TURNS":
 			overrides.max_turns = setting.get_value()
+		"MENU_SETTINGS_ITEMS":
+			overrides.items = setting.get_value()
 		"MENU_SETTINGS_AWARD_TYPE":
 			match setting.get_value():
 				"MENU_SETTINGS_AWARD_LINEAR":
@@ -109,6 +117,8 @@ func return_to_board(): pass
 @rpc
 func load_minigame(): pass
 @rpc
+func heat_started(_heat: int): pass
+@rpc
 func playerstate_updated(_players: Array): pass
 @rpc
 func minigame_ended(_was_try: bool, _placement, _reward): pass
@@ -143,7 +153,7 @@ func game_ended(): pass
 	if is_lobby_owner(multiplayer.get_remote_sender_id()):
 		current_board = board
 		var cake_cost := 30
-		var max_turns := 10
+		var max_turns := 6
 		var scene: SceneState = load(PluginSystem.board_loader.get_board_path(current_board)).get_state()
 		for i in range(scene.get_node_count()):
 			var instance: PackedScene = scene.get_node_instance(i)
@@ -377,6 +387,8 @@ func _goto_scene_board_callback(scene: Node):
 	if not is_lobby_owner(multiplayer.get_remote_sender_id()):
 		return
 	minigame_state.is_try = is_try
+	minigame_state.heat = 1
+	minigame_state.heat_results = []
 	broadcast(load_minigame)
 	goto_minigame()
 
@@ -444,7 +456,7 @@ func get_ffa_reward(pos: int):
 ## The last two rounds are the final frenzy: minigame cookie rewards are doubled. (The turn counter has already moved
 ## on when the minigame of a round is played, so the minigame after round N is played at turn N + 1.)
 func reward_factor() -> int:
-	return 2 if turn >= overrides.max_turns else 1
+	return (2 if turn >= overrides.max_turns else 1) * minigame_stakes
 
 
 func _count_stat(player_id: int, key: String) -> void:
@@ -477,6 +489,19 @@ func _record_minigame_win(minigame_type, minigame_teams, placement) -> void:
 func _goto_board(placement) -> void:
 	if OS.has_environment("MINIGAME_RESULT_LOG"):
 		print("MINIGAME_RESULT ", placement)
+	# A game with several heats is played again, the results are added up after the last heat
+	var config := minigame_state.minigame_config
+	if config.heats > 1:
+		minigame_state.heat_results.append(placement)
+		if minigame_state.heat < config.heats:
+			minigame_state.heat += 1
+			broadcast(heat_started.bind(minigame_state.heat))
+			broadcast(load_minigame)
+			call_deferred("_goto_scene_minigame", config.scene_path)
+			return
+		placement = _combine_heats(minigame_state.minigame_type, minigame_state.heat_results)
+		minigame_state.heat = 1
+		minigame_state.heat_results = []
 	# Only award if the players were not trying the minigame out
 	if minigame_state.is_try:
 		_goto_scene_board.call_deferred()
@@ -492,6 +517,7 @@ func _goto_board(placement) -> void:
 	minigame_state = null
 	_record_minigame_win(minigame_type, minigame_teams, placement)
 	var factor := reward_factor()
+	minigame_stakes = 1
 
 	match minigame_type:
 		MINIGAME_TYPES.FREE_FOR_ALL:
@@ -579,6 +605,47 @@ func _goto_board(placement) -> void:
 		encoded.append(state.encode())
 	broadcast(playerstate_updated.bind(encoded))
 	broadcast(minigame_ended.bind(false, placement, minigame_summary.reward))
+
+## Adds up what the heats of a minigame returned and returns the result in the same form as one heat
+func _combine_heats(type, results: Array):
+	match type:
+		MINIGAME_TYPES.FREE_FOR_ALL, MINIGAME_TYPES.DUEL:
+			# 4 points for a first place ... 1 point for the last place in every heat (2 and 1 in a duel)
+			var total := {}
+			var players := 0
+			for heat in results:
+				for group in heat:
+					players += group.size()
+			for heat in results:
+				var rank := 0
+				for group in heat:
+					for player_id in group:
+						total[player_id] = total.get(player_id, 0) + (players / results.size() - rank)
+					rank += group.size()
+			var by_points := {}
+			for player_id in total:
+				if not by_points.has(total[player_id]):
+					by_points[total[player_id]] = []
+				by_points[total[player_id]].append(player_id)
+			var keys := by_points.keys()
+			keys.sort()
+			keys.reverse()
+			var placement := []
+			for key in keys:
+				placement.append(by_points[key])
+			return placement
+		_:
+			# 2v2 and 1v3: the side with more won heats wins, a tie goes to whoever won the last heat
+			var wins := {}
+			for heat in results:
+				wins[heat] = wins.get(heat, 0) + 1
+			var best = results.back()
+			var best_wins: int = wins.get(best, 0)
+			for key in wins:
+				if key is int and key >= 0 and wins[key] > best_wins:
+					best = key
+					best_wins = wins[key]
+			return best
 
 func minigame_win_by_points(points: Array) -> void:
 	var players := []
@@ -732,7 +799,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 
 @rpc func save_game_callback(_data: Dictionary, _err: String): pass
 
-@rpc func load_savegame(data: Dictionary) -> void:
+@rpc("any_peer") func load_savegame(data: Dictionary) -> void:
 	if not enable_savegames or not is_lobby_owner(multiplayer.get_remote_sender_id()):
 		return
 
@@ -742,7 +809,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 	playerstates = []
 	for i in len(savegame.players):
 		# TODO: what should we do here to add support for multiplayer savegames?
-		var addr := PlayerAddress.new(multiplayer.get_network_connected_peers()[0], i)
+		var addr := PlayerAddress.new(multiplayer.get_remote_sender_id(), i)
 		if savegame.players[i].is_ai:
 			addr = next_ai_addr()
 		var player_name: String = savegame.players[i].player_name
@@ -784,7 +851,7 @@ func _scene_loaded(s: PackedScene, callable: Callable):
 	send_settings()
 	send_board()
 
-@rpc func save_game() -> void:
+@rpc("any_peer") func save_game() -> void:
 	if not enable_savegames:
 		save_game_callback.rpc_id(multiplayer.get_remote_sender_id(), {}, "SAVE_GAME_DISABLED")
 		return

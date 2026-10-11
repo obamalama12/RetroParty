@@ -159,6 +159,11 @@ class MinigameState:
 	## Plugin Authors should ignore this property as it is handled transparently
 	## by the game
 	var is_try: bool = false
+
+	## The heat that is being played (see [member MinigameLoader.MinigameConfigFile.heats]), counted from 1
+	var heat := 1
+	## What the finished heats returned (server only)
+	var heat_results := []
 	
 	## Encodes this object to send it over the network. [br]
 	## Format is internal and subject to change! [br]

@@ -1,0 +1,23 @@
+# English texts of the minigame Perfect Stop.
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+msgid "MINIGAME_NAME"
+msgstr "Perfect Stop"
+
+msgid "MINIGAME_DESCRIPTION"
+msgstr "A marker sweeps back and forth over the bar above your podium. Press the button to STOP it inside the green zone!\n\nThe closer to the middle of the zone, the more points: PERFECT, GREAT, GOOD or OK. Seven rounds: the marker gets faster, the zone gets smaller, and in the last rounds the zone even moves. Most points wins!"
+
+msgid "MINIGAME_ACTION_JUMP"
+msgstr "Jump"
+
+msgid "MINIGAME_ACTION_PULL"
+msgstr "Pull (press as fast as you can)"
+
+msgid "MINIGAME_ACTION_STOP"
+msgstr "Stop the marker"

@@ -47,6 +47,39 @@ func _take(index: int) -> MinigameLoader.MinigameConfigFile:
 	_last = minigame
 	return minigame
 
+## Returns up to [param count] different minigames of [param type] for the players to vote on.
+## Games that were not played in this rotation come first and the game played last is left out,
+## so the vote offers fresh choices. Fewer than [param count] are returned only if the type has fewer games.
+## Call [method choose] with the winner afterwards.
+func get_vote_options(type: String, count := 3) -> Array[MinigameLoader.MinigameConfigFile]:
+	var options: Array[MinigameLoader.MinigameConfigFile] = []
+	_collect_options(options, type, count)
+	if options.size() < count:
+		# Not enough unplayed games left: start a new rotation
+		_minigames += _played
+		_played = []
+		_minigames.shuffle()
+		_collect_options(options, type, count)
+	if options.size() < count and _last != null and type in _last.type and not _last in options:
+		options.append(_last)
+	assert(options.size() > 0, "No minigame for type: " + type)
+	return options
+
+func _collect_options(options: Array[MinigameLoader.MinigameConfigFile], type: String, count: int) -> void:
+	for minigame in _minigames:
+		if options.size() >= count:
+			return
+		if type in minigame.type and minigame != _last and not minigame in options:
+			options.append(minigame)
+
+## Marks the winner of a vote as played. The other options stay in the rotation for a later round.
+func choose(minigame: MinigameLoader.MinigameConfigFile) -> void:
+	var index := _minigames.find(minigame)
+	if index != -1:
+		_minigames.remove_at(index)
+		_played.append(minigame)
+	_last = minigame
+
 ## Returns a random minigame that can be played in 1v3 mode
 func get_random_1v3() -> MinigameLoader.MinigameConfigFile:
 	return _get_random_minigame("1v3")

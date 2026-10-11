@@ -4,6 +4,7 @@
   "image_path": "res://plugins/minigames/escape_from_lava/screenshot.png",
   "translation_directory": "res://plugins/minigames/escape_from_lava/translations",
   "type": ["2v2", "Duel", "FFA"],
+  "heats": 2,
   "description": "MINIGAME_DESCRIPTION",
   "controls": [
     {

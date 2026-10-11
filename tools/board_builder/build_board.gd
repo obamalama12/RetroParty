@@ -33,7 +33,9 @@ func build_terrain(heights: PackedFloat32Array, colors: PackedByteArray) -> Arra
 	for iz in n:
 		for ix in n:
 			var i := iz * n + ix
-			st.set_uv(Vector2(float(ix) / (n - 1), float(iz) / (n - 1)))
+			var uv := Vector2(float(ix) / (n - 1), float(iz) / (n - 1))
+			st.set_uv(uv)
+			st.set_uv2(uv)     # the tiling ground detail
 			st.add_vertex(Vector3(-half + ix * cell, heights[i], -half + iz * cell))
 	for iz in n - 1:
 		for ix in n - 1:
@@ -52,6 +54,8 @@ func build_terrain(heights: PackedFloat32Array, colors: PackedByteArray) -> Arra
 
 
 var colors_texture: Texture2D
+# how often the ground detail repeats over the whole board (about 2.5 m per repeat)
+const DETAIL_TILES := 95.0
 
 
 func terrain_material() -> StandardMaterial3D:
@@ -61,7 +65,13 @@ func terrain_material() -> StandardMaterial3D:
 	m.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
 	m.specular_mode = BaseMaterial3D.SPECULAR_TOON
 	m.roughness = 1.0
-	m.albedo_color = Color(0.7, 0.7, 0.7)    # the toon lighting is bright, so darken the colours a little
+	m.albedo_color = Color(0.77, 0.77, 0.77)    # the toon lighting is bright, so darken the colours a little
+	# a tiling grain over the colour map: blotches and tufts, so the ground is not one flat paint
+	m.detail_enabled = true
+	m.detail_albedo = load(BOARD_DIR + "ground_detail.png")
+	m.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MUL
+	m.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+	m.uv2_scale = Vector3(DETAIL_TILES, DETAIL_TILES, 1.0)
 	return m
 
 
@@ -153,7 +163,19 @@ func _initialize() -> void:
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(900, 900)
 	var water_mat: ShaderMaterial = load("res://assets/materials/water_still.tres").duplicate()
+	water_mat.shader = load("res://assets/shaders/water_foam.gdshader")
 	water_mat.set_shader_parameter("texture_scale", Vector2(900, 900))
+	# the depth of the water over the terrain, for the foam along the shores (0.5 + depth / 6 m, so the shore line is 0.5)
+	var n_cells: int = layout.n
+	var depth_bytes := PackedByteArray()
+	depth_bytes.resize(n_cells * n_cells)
+	for i in n_cells * n_cells:
+		depth_bytes[i] = int(clampf(0.5 + (layout.water_y - heights[i]) / 6.0, 0.0, 1.0) * 255.0)
+	var shore_tex := ImageTexture.create_from_image(Image.create_from_data(n_cells, n_cells, false, Image.FORMAT_R8, depth_bytes))
+	ResourceSaver.save(shore_tex, BOARD_DIR + "shore_depth.res")
+	water_mat.set_shader_parameter("shore_map", load(BOARD_DIR + "shore_depth.res"))
+	water_mat.set_shader_parameter("shore_origin", Vector2(-layout.half, -layout.half))
+	water_mat.set_shader_parameter("shore_size", 2.0 * layout.half)
 	plane.material = water_mat
 	var water := MeshInstance3D.new()
 	water.mesh = plane
@@ -253,7 +275,8 @@ func _initialize() -> void:
 	var controller: Node3D = load("res://common/scenes/board_logic/controller/controller.tscn").instantiate()
 	own(board, controller, "Controller")
 	controller.set("COOKIES_FOR_CAKE", 20)
-	controller.set("MAX_TURNS", 40)
+	controller.set("MAX_TURNS", 6)
+	controller.set("show_linking_type", 3)
 	controller.set("start_node", NodePath("../Nodes/" + str(layout.start)))
 	for i in 4:
 		own(board, load("res://common/scenes/board_logic/player_board/player_board.tscn").instantiate(), "Player%d" % (i + 1))
@@ -287,7 +310,7 @@ func _initialize() -> void:
 
 	var music := AudioStreamPlayer.new()
 	music.process_mode = Node.PROCESS_MODE_ALWAYS
-	music.stream = load("res://assets/music/boards/kdevalley.wav")
+	music.stream = load("res://assets/music/retro/valley_stroll.ogg")
 	music.autoplay = true
 	own(board, music, "AudioStreamPlayer")
 	own(board, load("res://common/scenes/speech_dialog/speech_dialog.tscn").instantiate(), "SpeechDialog")

@@ -24,6 +24,9 @@ class MinigameConfigFile:
 	var controls := []
 	## The valid [enum Lobby.MINIGAME_TYPES] for this minigame
 	var type := []
+	## How often the game is played in a row before the result counts ("heats"). Short races use 2: the results of the
+	## heats are added up, so one game takes long enough. Optional entry "heats" of the config file.
+	var heats := 1
 
 ## This is the entry point filename to every minigame.
 const MINIGAME_CONFIG_FILENAME := [ "minigame.json" ]
@@ -156,6 +159,9 @@ static func parse_file(path: String) -> MinigameConfigFile:
 		return null
 
 	config.type = result.type
+
+	if result.has("heats") and (result.heats is float or result.heats is int):
+		config.heats = clampi(int(result.heats), 1, 5)
 
 	if result.has("image_path"):
 		if result.image_path is String:

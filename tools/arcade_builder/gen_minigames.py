@@ -46,6 +46,33 @@ GAMES = {
         extra={}),
 }
 
+STAGE_POSITIONS = [(-4.65, 2.0), (-1.55, 2.0), (1.55, 2.0), (4.65, 2.0)]
+DIRECTIONS = {"actions": ["spacer", "up", "spacer", "left", "down", "right"], "text": "MINIGAME_ACTION_DIRECTIONS"}
+
+GAMES.update({
+    "pattern_pop": dict(
+        title="Pattern Pop", node="PatternPop", types=["FFA", "Duel", "2v2", "1v3"], score=True, duration=120.0, clock=False,
+        positions=STAGE_POSITIONS,
+        controls=[DIRECTIONS],
+        texts={"MINIGAME_ACTION_DIRECTIONS": "Repeat the pattern with the direction buttons"},
+        description="WATCH the big screen: arrows light up one after the other.\n\nWhen it says YOUR TURN, press the same arrows in the same order with your direction buttons. A finished pattern scores points, the fastest players get a bonus, a wrong button ends your round. The pattern grows by one arrow every round, five rounds in all. Most points wins!",
+        extra={}),
+    "quick_draw": dict(
+        title="Quick Draw", node="QuickDraw", types=["FFA", "Duel", "2v2", "1v3"], score=True, duration=120.0, clock=False,
+        positions=STAGE_POSITIONS,
+        controls=[{"actions": ["action1"], "text": "MINIGAME_ACTION_PRESS"}],
+        texts={"MINIGAME_ACTION_PRESS": "Press as soon as the light turns GREEN"},
+        description="Watch the signal light. While it is RED or yellow, do NOT press!\n\nWhen it turns GREEN, press the button as fast as you can. The fastest player of a round scores the most points. Pressing too early is a false start and you sit the round out. Watch out for fake yellow flashes! Six rounds, the last one counts double. Most points wins!",
+        extra={}),
+    "perfect_stop": dict(
+        title="Perfect Stop", node="PerfectStop", types=["FFA", "Duel", "2v2", "1v3"], score=True, duration=120.0, clock=False,
+        positions=STAGE_POSITIONS,
+        controls=[{"actions": ["action1"], "text": "MINIGAME_ACTION_STOP"}],
+        texts={"MINIGAME_ACTION_STOP": "Stop the marker"},
+        description="A marker sweeps back and forth over the bar above your podium. Press the button to STOP it inside the green zone!\n\nThe closer to the middle of the zone, the more points: PERFECT, GREAT, GOOD or OK. Seven rounds: the marker gets faster, the zone gets smaller, and in the last rounds the zone even moves. Most points wins!",
+        extra={}),
+})
+
 TSCN = '''[gd_scene load_steps={steps} format=3]
 
 [ext_resource type="Script" path="res://plugins/minigames/{dir}/minigame.gd" id="1"]
@@ -85,7 +112,7 @@ grow_horizontal = 2
 grow_vertical = 2
 icon = ExtResource("5")
 '''
-    if dir_name != "hot_bomb":
+    if dir_name != "hot_bomb" and g.get("clock", True):
         text += '''
 [node name="Time" type="Label" parent="Screen"]
 layout_mode = 0
@@ -115,6 +142,7 @@ vertical_alignment = 1
         json.dump(config, f, indent="\t")
     texts = {"MINIGAME_NAME": g["title"], "MINIGAME_DESCRIPTION": g["description"],
              "MINIGAME_ACTION_JUMP": "Jump", "MINIGAME_ACTION_PULL": "Pull (press as fast as you can)"}
+    texts.update(g.get("texts", {}))
     po = '''# English texts of the minigame {title}.
 msgid ""
 msgstr ""
@@ -132,5 +160,8 @@ msgstr ""
 
 
 if __name__ == "__main__":
+    # python gen_minigames.py [name ...]: only write those games (the others may have been edited by hand since)
+    import sys
     for name, game in GAMES.items():
-        write_game(name, game)
+        if len(sys.argv) == 1 or name in sys.argv[1:]:
+            write_game(name, game)

@@ -525,10 +525,35 @@ def statue(p):
     p.block("hay_dark", (-1.0, 4.35, 0.15), (0.34, 0.3, 0.14))                               # briefcase
 
 
+def bench(p):
+    """A park bench, about 2.4 m wide. The seat faces +z."""
+    for sx in (-1, 1):
+        p.block("stone_dark", (sx * 1.0, 0.35, 0), (0.14, 0.35, 0.5))                           # legs
+        p.block("brown_dark", (sx * 1.2, 0.75, 0), (0.07, 0.07, 0.5))                           # arm rests
+    p.block("wood_light", (0, 0.75, 0.1), (1.25, 0.07, 0.5), bevel=0.02)                        # seat
+    p.block("wood", (0, 1.15, -0.4), (1.25, 0.2, 0.06), bevel=0.02, rot=(-8, 0, 0))             # back rest
+    p.block("wood", (0, 1.5, -0.45), (1.25, 0.12, 0.06), bevel=0.02, rot=(-8, 0, 0))
+
+
+def planter(p):
+    """A round raised flower bed, about 3.6 m across."""
+    p.cone("stone_light", (0, 0.2, 0), 1.9, 0.4, top=1.8, segs=18, smooth=False)
+    p.cone("stone_dark", (0, 0.42, 0), 1.95, 0.08, segs=18, smooth=False)
+    p.cone("dirt", (0, 0.45, 0), 1.65, 0.12, segs=18, smooth=False)
+    p.blob("green", (0, 0.75, 0), (1.0, 0.5, 1.0))
+    colors = ["pink", "yellow", "red", "white", "orange", "purple"]
+    for i in range(14):
+        a = math.radians(i * 360 / 14)
+        r = 1.15 if i % 2 == 0 else 0.6
+        p.blob("green_dark", (r * math.cos(a), 0.65, r * math.sin(a)), (0.32, 0.25, 0.32), segs=8)
+        p.blob(colors[i % len(colors)], (r * math.cos(a), 0.92, r * math.sin(a)), (0.22, 0.2, 0.22), segs=8)
+    p.blob("yellow", (0, 1.35, 0), (0.28, 0.28, 0.28), segs=10)
+
+
 PROPS = dict(Cottage=cottage, Barn=barn, Windmill=windmill, Hay=hay, Well=well, Stall=stall, Lantern=lantern,
              Signpost=signpost, Dock=dock, Lighthouse=lighthouse, Castle=castle, Cave=cave, Tombstone=tombstone,
              Cross=cross, Crypt=crypt, BeachHut=beach_hut, Umbrella=umbrella, Igloo=igloo, Snowman=snowman, Portal=portal, Campfire=campfire, Tent=tent,
-             Fountain=fountain, TownHall=town_hall, Arch=arch, Flag=flag, Statue=statue)
+             Fountain=fountain, TownHall=town_hall, Arch=arch, Flag=flag, Statue=statue, Bench=bench, Planter=planter)
 
 
 def export(name, fn):

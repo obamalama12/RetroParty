@@ -176,7 +176,7 @@ func _on_Load_pressed() -> void:
 
 func _on_SaveGame_Load_pressed(filename: String, savegame: SaveGameLoader.SaveGame) -> void:
 	var game := Global.create_local_server()
-	await get_tree().network_peer.connection_succeeded
+	await game.multiplayer.connected_to_server
 	lobby = await game.create_lobby()
 	if not lobby:
 		Global.destroy_local_server()
@@ -387,9 +387,6 @@ func _on_connection_failed():
 	$AcceptDialog.title = "MENU_LABEL_CONNECTION_ERROR"
 	$AcceptDialog.dialog_text = "MENU_LABEL_CONNECTION_TIMEOUT"
 	$AcceptDialog.popup_centered()
-	get_tree().network_peer.connection_failed.disconnect(_on_connection_failed)
-	get_tree().network_peer.connection_succeeded.disconnect(_on_connection_succeeded)
-	get_tree().network_peer = null
 	Global.shutdown_connection()
 
 func _on_connection_succeeded(server):

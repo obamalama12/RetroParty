@@ -21,7 +21,7 @@ const GOLDEN_VALUE := 3
 var streak := 0
 var golden := false
 var action_time := 0.0
-@onready var NEEDED_BUTTON_PRESSES := 35 if info.lobby.minigame_state.minigame_type != Lobby.MINIGAME_TYPES.TWO_VS_TWO else 70
+@onready var NEEDED_BUTTON_PRESSES := 60 if info.lobby.minigame_state.minigame_type != Lobby.MINIGAME_TYPES.TWO_VS_TWO else 120
 
 var AI_MIN_WAIT_TIME: float
 var AI_MAX_WAIT_TIME: float

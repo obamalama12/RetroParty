@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://plugins/minigames/pattern_pop/minigame.gd" id="1"]
+[ext_resource type="PackedScene" path="res://common/scenes/arcade/arcade_player.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://common/scenes/countdown/countdown.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://common/scenes/overlays/score_overlay.tscn" id="4"]
+[ext_resource type="Texture2D" path="res://common/scenes/board_logic/controller/icons/cookie.png" id="5"]
+
+[node name="PatternPop" type="Node3D"]
+script = ExtResource("1")
+duration = 120.0
+
+[node name="Player1" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.65, 0.05, 2.0)
+
+[node name="Player2" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.55, 0.05, 2.0)
+
+[node name="Player3" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 0.05, 2.0)
+
+[node name="Player4" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.65, 0.05, 2.0)
+
+[node name="Countdown" parent="." instance=ExtResource("3")]
+
+[node name="Screen" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ScoreOverlay" parent="Screen" instance=ExtResource("4")]
+layout_mode = 1
+grow_horizontal = 2
+grow_vertical = 2
+icon = ExtResource("5")

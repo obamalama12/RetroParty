@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-const SPEED = 4
+const SPEED = 2.8
 const GRAVITY = 9.8
 const GRAVITY_DIR = Vector3(0, -1, 0)
 

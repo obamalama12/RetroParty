@@ -19,7 +19,7 @@ msgid "MINIGAME_NAME"
 msgstr "Boat Rally"
 
 msgid "MINIGAME_DESCRIPTION"
-msgstr "Reach the finish line without getting hit by a bomb.\nBombs fall in denser waves. Grab arrows for a speed boost and bubbles for a shield!"
+msgstr "Reach the finish line! Your boat survives two bombs, the third one sinks it.\nBombs fall in denser waves. Grab arrows for a speed boost and bubbles for a shield!"
 
 msgid "MINIGAME_ACTION_PADDLE"
 msgstr "Paddle"
@@ -35,3 +35,6 @@ msgstr "Shield broken!"
 
 msgid "BOAT_RALLY_FINISH"
 msgstr "FINISH!"
+
+msgid "BOAT_RALLY_OUCH"
+msgstr "OUCH! {lives} left"
